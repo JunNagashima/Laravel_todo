@@ -1,12 +1,12 @@
-# ステージ1：Node.jsでフロントエンドのアセットをビルド
-FROM node:16 as node-builder
+# ステージ1：Node.js v18.15.0でフロントエンドのアセットをビルド
+FROM node:18.15.0 as node-builder
 
 COPY . /app
 WORKDIR /app
 RUN npm install
 RUN npm run production
 
-# ステージ2：PHPとApacheを使用
+# ステージ2：PHP 8.1とApacheを使用
 FROM php:8.1-apache
 
 # 必要なPHP拡張機能のインストール
