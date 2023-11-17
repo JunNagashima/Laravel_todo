@@ -4,7 +4,7 @@ FROM node:18.15.0 as node-builder
 COPY . /app
 WORKDIR /app
 RUN npm install
-RUN npm run production
+RUN npm run build
 
 # ステージ2：PHP 8.1とApacheを使用
 FROM php:8.1-apache
