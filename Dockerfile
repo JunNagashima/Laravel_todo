@@ -1,9 +1,10 @@
 # ステージ1：Node.js v18.15.0でフロントエンドのアセットをビルド
 FROM node:18.15.0 as node-builder
 
-COPY . /app
 WORKDIR /app
+COPY package*.json ./
 RUN npm install
+COPY . .
 RUN npm run build
 
 # ステージ2：PHP 8.1とApacheを使用
@@ -35,6 +36,7 @@ RUN composer install --no-dev --optimize-autoloader
 
 # パーミッションの設定
 RUN chown -R www-data:www-data /var/www/html
+RUN chmod -R 755 /var/www/html
 
 # ポートのエクスポーズ
 EXPOSE 8080
