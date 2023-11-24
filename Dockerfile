@@ -1,42 +1,22 @@
-# ステージ1：Node.js v18.15.0でフロントエンドのアセットをビルド
-FROM node:18.15.0 as node-builder
+# richarvey/nginx-php-fpmをベースとする
+FROM richarvey/nginx-php-fpm:2.1.2
 
-WORKDIR /app
-COPY package*.json ./
-RUN npm install
 COPY . .
-RUN npm run build
 
-# ステージ2：PHP 8.1とApacheを使用
-FROM php:8.1-apache
+# Image config
+ENV SKIP_COMPOSER 1
+ENV WEBROOT /var/www/html/public
+ENV PHP_ERRORS_STDERR 1
+ENV RUN_SCRIPTS 1
+ENV REAL_IP_HEADER 1
 
-# 必要なPHP拡張機能のインストール
-RUN apt-get update && apt-get install -y \
-    libpng-dev \
-    libonig-dev \
-    libxml2-dev \
-    zip \
-    unzip \
-    git \
-    curl
+# Laravel config
+ENV APP_ENV production
+ENV APP_DEBUG false
+ENV LOG_CHANNEL stderr
 
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
+# Allow composer to run as root
+ENV COMPOSER_ALLOW_SUPERUSER 1
 
-# Apacheの設定
-RUN a2enmod rewrite headers
-RUN sed -i 's/80/8080/g' /etc/apache2/ports.conf
-RUN sed -i 's#/var/www/html#/var/www/html/public#g' /etc/apache2/sites-available/000-default.conf
+CMD ["/start.sh"]
 
-# Composerのインストール
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-
-# アプリケーションのコピーとComposer依存関係のインストール
-COPY --from=node-builder /app /var/www/html
-RUN composer install --no-dev --optimize-autoloader
-
-# パーミッションの設定
-RUN chown -R www-data:www-data /var/www/html
-RUN chmod -R 755 /var/www/html
-
-# ポートのエクスポーズ
-EXPOSE 8080
