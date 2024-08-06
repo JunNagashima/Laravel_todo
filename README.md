@@ -101,3 +101,4 @@ php artisan db:seed
 
 1. MAMPのWebStartからwebページを開く
 2. ページの右上のMyWebsiteボタンを押す
+
